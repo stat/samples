@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api
+  namespace: project-development
+spec:
+  selector:
+    matchLabels:
+      run: api
+  template:
+    metadata:
+      labels:
+        run: api
+    spec:
+      serviceAccountName: api
+      containers:
+      - name: api
+        image: 
+        imagePullPolicy: Always
+        env:
+        - name: ENV_VAR
+          valueFrom:
+            secretKeyRef:
+              name: env
+              key: var
+        ports:
+        - containerPort: 8000
+          protocol: TCP
+      - name: cloud-sql-proxy
+        image: gcr.io/cloudsql-docker/gce-proxy:1.17
+        command:
+          - "/cloud_sql_proxy"
+          - "-instances=jiox-328108:asia-south1:jiox-staging-s1a=tcp:5432"
+        securityContext:
+          runAsNonRoot: true
